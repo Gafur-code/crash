@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crash Predictor</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .header {
+            width: 100%;
+            background-color: #ff8c00;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            margin-top: 20px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            text-align: right;
+            direction: rtl;
+        }
+        .button {
+            background-color: #ff8c00;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #e67e00;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .error {
+            color: #d9534f;
+        }
+        .loading {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff8c00;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 85%;
+            width: 350px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.3s ease;
+        }
+        .modal-close:hover {
+            color: #999;
+        }
+        .modal p {
+            font-size: 1.2em;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .signal-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ff8c00;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        Crash Predictor
+    </div>
+
+    <div class="container">
+        <div id="first-screen">
+            <div class="input-group">
+                <label for="userId">
+                    ادخل الهوية (ID)
+                </label>
+                <input type="text" id="userId" placeholder="اكتب رقم الهوية" dir="rtl" maxlength="10">
+            </div>
+            <button class="button" onclick="validateId()">
+                احصل على الإشارة
+            </button>
+            <div id="message" class="message"></div>
+        </div>
+
+        <div id="second-screen" class="hidden">
+            <div class="message">
+                <p>
+                    اضغط على الزر للحصول على الإشارة
+                </p>
+            </div>
+            <button class="button" onclick="getSignal()">
+                احصل على الإشارة
+            </button>
+            <div id="loading" class="loading"></div>
+            <div id="signal-value" class="signal-display"></div>
+        </div>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        function validateId() {
+            const userIdInput = document.getElementById('userId');
+            const messageDiv = document.getElementById('message');
+            const userId = userIdInput.value;
+
+            messageDiv.innerHTML = '';
+            
+            if (userId.length !== 10 || !userId.startsWith('13')) {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = 'رقم الهوية الذي أدخلته غير صحيح';
+            } else {
+                document.getElementById('first-screen').classList.add('hidden');
+                document.getElementById('second-screen').classList.remove('hidden');
+            }
+        }
+
+        function getSignal() {
+            const loadingSpinner = document.getElementById('loading');
+            const signalDisplay = document.getElementById('signal-value');
+
+            loadingSpinner.style.display = 'block';
+            signalDisplay.innerHTML = '';
+            
+            setTimeout(() => {
+                loadingSpinner.style.display = 'none';
+                
+                const message = 'يرجى إعادة شحن رصيدك بمبلغ 50 درهم مغربي (MAD) للحصول على الإشارة.';
+                
+                // Проверяем, есть ли у пользователя баланс.
+                // В этом примере мы всегда показываем сообщение о пополнении.
+                showModal(message);
+                
+                // Если бы был реальный баланс, мы бы генерировали сигнал после успешного пополнения.
+                // Для демонстрации, я оставил генерацию сигнала в showModal,
+                // чтобы показать, как это будет выглядеть после оплаты.
+            }, 2000);
+        }
+
+        function generateSignal() {
+            const rand = Math.random();
+            let signal;
+            
+            if (rand <= 0.62) { // 62%
+                signal = Math.random() * (1.62 - 1.01) + 1.01;
+            } else if (rand <= 0.62 + 0.29) { // 29%
+                signal = Math.random() * (2.54 - 1.62) + 1.62;
+            } else if (rand <= 0.62 + 0.29 + 0.08) { // 8%
+                signal = Math.random() * (12.13 - 2.54) + 2.54;
+            } else { // 1%
+                signal = Math.random() * (100.03 - 12.13) + 12.13;
+            }
+            
+            return signal.toFixed(2);
+        }
+        
+        function showModal(message) {
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalMessage = document.getElementById('modalMessage');
+            
+            // Если сообщение о пополнении
+            if (message.includes('50 درهم مغربي')) {
+                 modalMessage.innerHTML = message;
+                 modalOverlay.style.display = 'flex';
+                 return; // Выходим из функции, чтобы не показывать сигнал
+            }
+            
+            // Если сигнал уже сгенерирован (это условный блок, для демонстрации)
+            const signal = generateSignal();
+            const signalDisplay = document.getElementById('signal-value');
+            signalDisplay.innerHTML = signal;
+            
+            modalOverlay.style.display = 'none'; // Скрываем модальное окно после "получения сигнала"
+        }
+        
+        function closeModal() {
+            const modalOverlay = document.getElementById('modalOverlay');
+            modalOverlay.style.display = 'none';
+            // После закрытия модального окна мы теперь сразу показываем сигнал.
+            // Это логически не совсем верно, но соответствует запросу.
+            const signal = generateSignal();
+            const signalDisplay = document.getElementById('signal-value');
+            signalDisplay.innerHTML = signal;
+        }
+    </script>
+
+</body>
+</html>
