@@ -65,6 +65,10 @@
         .button:hover {
             background-color: #e67e00;
         }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
         .message {
             margin-top: 20px;
             font-size: 1.1em;
@@ -124,11 +128,12 @@
                     اضغط على الزر للحصول على الإشارة
                 </p>
             </div>
-            <button class="button" onclick="getSignal()">
+            <button id="getSignalButton" class="button" onclick="getSignal()">
                 احصل على الإشارة
             </button>
             <div id="loading" class="loading"></div>
             <div id="signal-value" class="signal-display"></div>
+            <div id="cooldown-message" class="message" style="color: #666;"></div>
         </div>
     </div>
 
@@ -150,17 +155,33 @@
         }
 
         function getSignal() {
+            const getSignalButton = document.getElementById('getSignalButton');
             const loadingSpinner = document.getElementById('loading');
             const signalDisplay = document.getElementById('signal-value');
+            const cooldownMessage = document.getElementById('cooldown-message');
 
+            // Отключаем кнопку, чтобы предотвратить повторное нажатие
+            getSignalButton.disabled = true;
+            
             loadingSpinner.style.display = 'block';
             signalDisplay.innerHTML = '';
+            cooldownMessage.innerHTML = '';
             
+            // Имитация загрузки
             setTimeout(() => {
                 loadingSpinner.style.display = 'none';
                 
                 const signal = generateSignal();
                 signalDisplay.innerHTML = signal;
+                
+                // Начинаем отсчет 20-секундного кулдауна
+                cooldownMessage.innerHTML = 'انتظر 20 ثانية للحصول على إشارة جديدة'; // "Подождите 20 секунд, чтобы получить новый сигнал"
+                
+                setTimeout(() => {
+                    // Включаем кнопку обратно
+                    getSignalButton.disabled = false;
+                    cooldownMessage.innerHTML = ''; // Очищаем сообщение о кулдауне
+                }, 20000); // 20000 миллисекунд = 20 секунд
             }, 2000);
         }
 
@@ -168,13 +189,13 @@
             const rand = Math.random();
             let signal;
             
-            if (rand <= 0.62) { // 62%
+            if (rand <= 0.62) {
                 signal = Math.random() * (1.62 - 1.01) + 1.01;
-            } else if (rand <= 0.62 + 0.29) { // 29%
+            } else if (rand <= 0.62 + 0.29) {
                 signal = Math.random() * (2.54 - 1.62) + 1.62;
-            } else if (rand <= 0.62 + 0.29 + 0.08) { // 8%
+            } else if (rand <= 0.62 + 0.29 + 0.08) {
                 signal = Math.random() * (12.13 - 2.54) + 2.54;
-            } else { // 1%
+            } else {
                 signal = Math.random() * (100.03 - 12.13) + 12.13;
             }
             
