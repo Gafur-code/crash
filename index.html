@@ -50,7 +50,7 @@
             border-radius: 5px;
             box-sizing: border-box;
             text-align: right;
-            direction: rtl; /* Для правильного отображения арабского текста */
+            direction: rtl;
         }
         .button {
             background-color: #ff8c00;
@@ -73,8 +73,20 @@
         .error {
             color: #d9534f;
         }
-        .success {
-            color: #5cb85c;
+        /* Стили для имитации загрузки */
+        .loading {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff8c00;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none; /* Скрыто по умолчанию */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -94,6 +106,7 @@
         <button class="button" onclick="getSignal()">
             احصل على الإشارة
         </button>
+        <div id="loading" class="loading"></div>
         <div id="message" class="message"></div>
     </div>
 
@@ -101,15 +114,28 @@
         function getSignal() {
             const userIdInput = document.getElementById('userId');
             const messageDiv = document.getElementById('message');
+            const loadingSpinner = document.getElementById('loading');
             const userId = userIdInput.value;
+
+            // Очищаем предыдущие сообщения и спиннер
+            messageDiv.innerHTML = '';
+            loadingSpinner.style.display = 'none';
 
             // Проверка на 10 цифр и начало с '13'
             if (userId.length !== 10 || !userId.startsWith('13')) {
                 messageDiv.className = 'message error';
                 messageDiv.innerHTML = 'رقم الهوية الذي أدخلته غير صحيح';
             } else {
-                messageDiv.className = 'message success';
-                messageDiv.innerHTML = 'يرجى إعادة شحن رصيدك بمبلغ 50 درهم مغربي (MAD) للحصول على الإشارة.';
+                // Показываем спиннер загрузки
+                loadingSpinner.style.display = 'block';
+
+                // Имитация задержки в 2 секунды
+                setTimeout(() => {
+                    // Скрываем спиннер
+                    loadingSpinner.style.display = 'none';
+                    // Выводим сообщение в виде всплывающего окна (alert)
+                    alert('يرجى إعادة شحن رصيدك بمبلغ 50 درهم مغربي (MAD) للحصول على الإشارة.');
+                }, 2000); // 2000 миллисекунд = 2 секунды
             }
         }
     </script>
